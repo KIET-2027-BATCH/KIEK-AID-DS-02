@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Prediction</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-image: url(https://www.electricchoice.com/wp-content/uploads/2017/04/iStock-504817422-1280x640.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+} 
+
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 350px;
+}
+
+h1 {
+    font-size: 1.5em;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1em;
+}
+
+input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 150px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 1.2em;
+  
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Electricity Consumption Prediction</h1>
+        <form id="prediction-form">
+            <label>Production: <input type="number" step="any" name="production" required></label>
+            <label>Nuclear: <input type="number" step="any" name="nuclear" required></label>
+            <label>Wind: <input type="number" step="any" name="wind" required></label>
+            <label>Hydroelectric: <input type="number" step="any" name="hydroelectric" required></label>
+            <label>Oil & Gas: <input type="number" step="any" name="oilGas" required></label>
+            <label>Coal: <input type="number" step="any" name="coal" required></label>
+            <label>Solar: <input type="number" step="any" name="solar" required></label>
+            <label>Biomass: <input type="number" step="any" name="biomass" required></label>
+            <button type="submit">Predict</button>
+        </form>
+        <h2 id="result"></h2>
+    </div>
+
+    <script>
+        document.getElementById("prediction-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            let formData = new FormData(event.target);
+            let jsonData = {};
+            formData.forEach((value, key) => jsonData[key] = parseFloat(value));
+
+            try {
+                let response = await fetch("/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(jsonData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                let result = await response.json();
+                document.getElementById("result").textContent = result.prediction ? 
+                    `Predicted Consumption: ${result.prediction}` : `Error: ${result.error}`;
+            } catch (error) {
+                document.getElementById("result").textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
